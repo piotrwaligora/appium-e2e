@@ -1,8 +1,11 @@
 package io.github.piotrwaligora.e2e;
 
 import io.appium.java_client.AppiumDriver;
+import io.github.piotrwaligora.e2e.config.TestConfig;
 import io.github.piotrwaligora.e2e.driver.AppiumServer;
 import io.github.piotrwaligora.e2e.driver.DriverFactory;
+import io.github.piotrwaligora.e2e.driver.Emulator;
+import io.github.piotrwaligora.e2e.driver.Platform;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -16,7 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The Appium server runs once for the whole suite; each test gets its own Appium session
- * (the app is installed and started) that is closed after the test.
+ * (the app is installed and started) that is closed after the test. After the suite the Android
+ * emulator is stopped as well ({@code android.emulator.shutdown}), so the next run boots a fresh one.
  * The start and the result of every test are written to the test log.
  */
 public abstract class BaseTest {
@@ -33,8 +37,11 @@ public abstract class BaseTest {
     }
 
     @AfterSuite(alwaysRun = true)
-    public void stopAppiumServer() {
+    public void stopAppiumServerAndEmulator() {
         AppiumServer.stop();
+        if (TestConfig.platform() == Platform.ANDROID && TestConfig.androidEmulatorShutdown()) {
+            Emulator.stop();
+        }
     }
 
     @BeforeMethod

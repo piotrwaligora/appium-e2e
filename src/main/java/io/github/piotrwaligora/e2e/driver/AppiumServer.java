@@ -141,7 +141,7 @@ public final class AppiumServer {
     private static Map<String, String> environment() {
         Map<String, String> environment = new HashMap<>();
         if (System.getenv("ANDROID_HOME") == null) {
-            environment.put("ANDROID_HOME", Path.of(System.getProperty("user.home"), "Android", "Sdk").toString());
+            environment.put("ANDROID_HOME", Emulator.androidHome().toString());
         }
         if (System.getenv("JAVA_HOME") == null) {
             environment.put("JAVA_HOME", System.getProperty("java.home"));
