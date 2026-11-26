@@ -1,6 +1,7 @@
 package io.github.piotrwaligora.e2e.ui;
 
 import io.appium.java_client.AppiumDriver;
+import io.github.piotrwaligora.e2e.Log;
 import io.github.piotrwaligora.e2e.config.TestConfig;
 import io.github.piotrwaligora.e2e.driver.Platform;
 import org.openqa.selenium.By;
@@ -36,22 +37,22 @@ public class ElementActions {
     /** Waits until the element is present and visible. */
     public WebElement waitFor(Map<Platform, By> locator) {
         By by = findBy(locator);
-        return wait.withMessage("element " + describe(by)).until(ExpectedConditions.visibilityOfElementLocated(by));
+        return found(by, wait.withMessage("element " + describe(by)).until(ExpectedConditions.visibilityOfElementLocated(by)));
     }
 
     /** Waits longer (or shorter) than the default timeout, for a screen that needs it. */
     public WebElement waitFor(Map<Platform, By> locator, Duration timeout) {
         By by = findBy(locator);
-        return new WebDriverWait(driver, timeout, TestConfig.polling())
+        return found(by, new WebDriverWait(driver, timeout, TestConfig.polling())
                 .ignoring(StaleElementReferenceException.class)
                 .withMessage("element " + describe(by))
-                .until(ExpectedConditions.visibilityOfElementLocated(by));
+                .until(ExpectedConditions.visibilityOfElementLocated(by)));
     }
 
     /** Waits until the element is visible and enabled. */
     public WebElement waitForClickable(Map<Platform, By> locator) {
         By by = findBy(locator);
-        return wait.withMessage("clickable element " + describe(by)).until(ExpectedConditions.elementToBeClickable(by));
+        return found(by, wait.withMessage("clickable element " + describe(by)).until(ExpectedConditions.elementToBeClickable(by)));
     }
 
     public void clickOn(Map<Platform, By> locator) {
@@ -81,6 +82,12 @@ public class ElementActions {
             throw new IllegalStateException("No " + platform + " locator in " + locator);
         }
         return by;
+    }
+
+    /** Logs the element found by a wait, e.g. {@code waitFor [ANDROID] AppiumBy.id: productTV -> ok}. */
+    private static WebElement found(By by, WebElement element) {
+        Log.info("waitFor " + describe(by) + " -> ok");
+        return element;
     }
 
     /** Locator with its platform for timeout messages, e.g. {@code [ANDROID] By.id: productTV}. */

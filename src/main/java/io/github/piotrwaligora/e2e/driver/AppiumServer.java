@@ -2,6 +2,7 @@ package io.github.piotrwaligora.e2e.driver;
 
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
+import io.github.piotrwaligora.e2e.Log;
 import io.github.piotrwaligora.e2e.config.TestConfig;
 
 import java.io.IOException;
@@ -186,6 +187,6 @@ public final class AppiumServer {
     }
 
     private static void log(String message) {
-        System.out.println("[Appium] " + message);
+        Log.info("[Appium] " + message);
     }
 }
