@@ -3,6 +3,7 @@
   "appium:automationName": "UiAutomator2",
   "appium:app": "apps/mda-2.3.0-27.apk",
   "appium:avd": "Pixel_API_36",
+  "appium:avdArgs": "-no-snapshot-load -no-snapshot-save",
   "appium:avdLaunchTimeout": 180000,
   "appium:avdReadyTimeout": 180000,
   "appium:appWaitActivity": "com.saucelabs.mydemoapp.android.view.activities.*",

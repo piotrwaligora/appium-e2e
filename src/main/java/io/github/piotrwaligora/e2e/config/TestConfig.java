@@ -32,6 +32,10 @@ public final class TestConfig {
         return Integer.parseInt(get("appium.port"));
     }
 
+    public static boolean androidEmulatorShutdown() {
+        return Boolean.parseBoolean(get("android.emulator.shutdown"));
+    }
+
     public static Duration timeout() {
         return Duration.ofSeconds(Long.parseLong(get("timeout.seconds")));
     }
