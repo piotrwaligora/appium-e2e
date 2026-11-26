@@ -27,3 +27,19 @@ No manual steps are needed before the run:
 Configuration:
 - `src/main/resources/config.properties`: platform, Appium server, waits; every key can be overridden with `-Dkey=value`;
 - `src/main/resources/capabilities/<platform>.json`: session capabilities, in the same format as in the Appium Inspector.
+
+## Page objects
+
+One page object serves both platforms. Each element is a map with a locator per platform;
+`ElementActions` picks the locator of the platform the tests run on (`findBy`) and waits for the element
+(FluentWait with polling, no `Thread.sleep`, no implicit wait):
+
+```java
+private static final Map<Platform, By> TITLE = Map.of(
+        IOS, AppiumBy.accessibilityId("title"),
+        ANDROID, AppiumBy.id("productTV"));
+
+public String getTitle() {
+    return actions.getText(TITLE);
+}
+```
