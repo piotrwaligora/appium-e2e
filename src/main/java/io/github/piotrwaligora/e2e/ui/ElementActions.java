@@ -84,9 +84,9 @@ public class ElementActions {
         return by;
     }
 
-    /** Logs the element found by a wait, e.g. {@code waitFor [ANDROID] AppiumBy.id: productTV -> ok}. */
+    /** Logs the element found by a wait, e.g. {@code Waiting for: [ANDROID] AppiumBy.id: productTV -> ok}. */
     private static WebElement found(By by, WebElement element) {
-        Log.info("waitFor " + describe(by) + " -> ok");
+        Log.info("Waiting for: " + describe(by) + " -> ok");
         return element;
     }
 
