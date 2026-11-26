@@ -11,6 +11,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -35,13 +36,22 @@ public class ElementActions {
     /** Waits until the element is present and visible. */
     public WebElement waitFor(Map<Platform, By> locator) {
         By by = findBy(locator);
-        return wait.withMessage("element " + by).until(ExpectedConditions.visibilityOfElementLocated(by));
+        return wait.withMessage("element " + describe(by)).until(ExpectedConditions.visibilityOfElementLocated(by));
+    }
+
+    /** Waits longer (or shorter) than the default timeout, for a screen that needs it. */
+    public WebElement waitFor(Map<Platform, By> locator, Duration timeout) {
+        By by = findBy(locator);
+        return new WebDriverWait(driver, timeout, TestConfig.polling())
+                .ignoring(StaleElementReferenceException.class)
+                .withMessage("element " + describe(by))
+                .until(ExpectedConditions.visibilityOfElementLocated(by));
     }
 
     /** Waits until the element is visible and enabled. */
     public WebElement waitForClickable(Map<Platform, By> locator) {
         By by = findBy(locator);
-        return wait.withMessage("clickable element " + by).until(ExpectedConditions.elementToBeClickable(by));
+        return wait.withMessage("clickable element " + describe(by)).until(ExpectedConditions.elementToBeClickable(by));
     }
 
     public void clickOn(Map<Platform, By> locator) {
@@ -71,5 +81,10 @@ public class ElementActions {
             throw new IllegalStateException("No " + platform + " locator in " + locator);
         }
         return by;
+    }
+
+    /** Locator with its platform for timeout messages, e.g. {@code [ANDROID] By.id: productTV}. */
+    private static String describe(By by) {
+        return "[" + TestConfig.platform() + "] " + by;
     }
 }
