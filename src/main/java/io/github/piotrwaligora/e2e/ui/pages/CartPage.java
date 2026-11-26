@@ -51,7 +51,8 @@ public class CartPage extends BasePage {
 
     private static Map<Platform, By> productByName(String name) {
         return Map.of(
-                IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText' AND label == '" + name + "'"),
+                // iOS product names have the color appended ("Sauce Labs Backpack - Black")
+                IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText' AND label BEGINSWITH '" + name + "'"),
                 ANDROID, AppiumBy.androidUIAutomator("new UiSelector().resourceIdMatches(\".*:id/titleTV\").text(\"" + name + "\")"));
     }
 }
