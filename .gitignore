@@ -1,6 +1,9 @@
 # Build output
 target/
 
+# TestNG default report folder (tests run outside Maven)
+test-output/
+
 # Allure
 allure-results/
 allure-report/
