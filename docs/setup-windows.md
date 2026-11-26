@@ -21,7 +21,7 @@ Everything installs per user, no admin rights needed. Versions used when the set
 The emulator uses WHPX (Windows Hypervisor Platform). Check:
 
 ```powershell
-& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -accel-check
+& "$env:USERPROFILE\Android\Sdk\emulator\emulator.exe" -accel-check
 ```
 
 Expected: `WHPX(...) is installed and usable.` If not, enable "Windows Hypervisor Platform" in Windows Features (admin, reboot).
@@ -29,11 +29,12 @@ Expected: `WHPX(...) is installed and usable.` If not, enable "Windows Hyperviso
 ## 2. Android SDK without Android Studio
 
 1. Download `commandlinetools-win-<build>_latest.zip` from https://developer.android.com/studio#command-line-tools-only
-2. Unzip it so that the tools end up in `%LOCALAPPDATA%\Android\Sdk\cmdline-tools\latest\bin`.
+2. Unzip it so that the tools end up in `%USERPROFILE%\Android\Sdk\cmdline-tools\latest\bin`
+   (any folder works, `ANDROID_HOME` points to it).
 3. Accept the licenses and install the packages:
 
 ```powershell
-$sdk = "$env:LOCALAPPDATA\Android\Sdk"
+$sdk = "$env:USERPROFILE\Android\Sdk"
 & "$sdk\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root=$sdk --licenses
 & "$sdk\cmdline-tools\latest\bin\sdkmanager.bat" --sdk_root=$sdk "platform-tools" "emulator" "build-tools/37.0.0" "platforms/android-36" "system-images/android-36/google_apis/x86_64"
 ```
@@ -41,7 +42,7 @@ $sdk = "$env:LOCALAPPDATA\Android\Sdk"
 4. Environment variables (user scope; open a new terminal or restart the IDE afterwards):
 
 ```powershell
-$sdk = "$env:LOCALAPPDATA\Android\Sdk"
+$sdk = "$env:USERPROFILE\Android\Sdk"
 [Environment]::SetEnvironmentVariable('ANDROID_HOME', $sdk, 'User')
 $path = [Environment]::GetEnvironmentVariable('Path', 'User')
 [Environment]::SetEnvironmentVariable('Path', "$path;$sdk\platform-tools;$sdk\emulator;$sdk\cmdline-tools\latest\bin", 'User')
@@ -77,10 +78,15 @@ The doctor reports only optional fixes (bundletool, ffmpeg, GStreamer); none of 
 Start the server with the Inspector plugin:
 
 ```powershell
-appium --use-plugins=inspector
+appium --use-plugins=inspector --allow-insecure=*:cors
 ```
 
 Inspector: http://127.0.0.1:4723/inspector (no separate desktop app needed).
+
+`--allow-insecure=*:cors` is needed because Appium 4 rejects state-changing requests that carry a browser
+`Origin` header unless CORS is allowed, and the Inspector plugin runs in the browser
+(error "Browser-origin requests are not allowed"). It lets any web page in the browser talk to the local
+server while it runs, so use it only for local work with the Inspector, not for test runs.
 
 ## 5. App under test
 
