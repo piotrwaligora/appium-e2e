@@ -22,7 +22,7 @@ public class NavigationBar extends BasePage {
 
     private static final Map<Platform, By> CART = Map.of(
             IOS, AppiumBy.accessibilityId("Cart-tab-item"),
-            ANDROID, AppiumBy.accessibilityId("asasa"));
+            ANDROID, AppiumBy.accessibilityId("View cart"));
 
     // iOS: the cart count label has no identifier; to be taken from the page source in CI
     private static final Map<Platform, By> CART_COUNT = Map.of(
