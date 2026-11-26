@@ -114,3 +114,15 @@ Use forward slashes in the path inside JSON.
 Done on Pixel_API_36 (Android 16, x86_64): a session installs and starts the app, the catalog screen
 shows "Products" (`com.saucelabs.mydemoapp.android:id/productTV`), page source and screenshot work,
 and the only context is `NATIVE_APP`.
+
+## Troubleshooting
+
+If every tap takes about 10 seconds, or the app shows a black screen after it restarts an activity
+(e.g. after a login), the emulator is in a bad state: close it and start it again with a cold boot:
+
+```powershell
+adb emu kill
+emulator -avd Pixel_API_36 -no-snapshot-load -no-boot-anim
+```
+
+On a freshly booted emulator taps take about 1 second.

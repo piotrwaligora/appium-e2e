@@ -42,4 +42,9 @@ public class ProductDetailsPage extends BasePage {
     public String getPrice() {
         return actions.getText(PRICE);
     }
+
+    public ProductDetailsPage addToCart() {
+        actions.clickOn(ADD_TO_CART_BUTTON);
+        return this;
+    }
 }

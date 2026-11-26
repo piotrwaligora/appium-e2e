@@ -74,6 +74,13 @@ public class ElementActions {
         return driver.findElements(findBy(locator)).stream().anyMatch(WebElement::isDisplayed);
     }
 
+    /** Waits for a system alert (e.g. an iOS validation message) and returns its text. */
+    public String getAlertText() {
+        String text = wait.withMessage("alert").until(ExpectedConditions.alertIsPresent()).getText();
+        Log.info("Waiting for: alert -> ok, text: " + text);
+        return text;
+    }
+
     /** Locator of the platform the tests run on. */
     private By findBy(Map<Platform, By> locator) {
         Platform platform = TestConfig.platform();
