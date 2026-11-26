@@ -21,9 +21,11 @@
         <selenium.version>4.54.0</selenium.version>
         <testng.version>7.12.0</testng.version>
         <assertj.version>3.27.7</assertj.version>
+        <allure.version>3.1.1</allure.version>
 
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+        <allure-maven.version>3.2.0</allure-maven.version>
     </properties>
 
     <dependencyManagement>
@@ -36,6 +38,13 @@
                 <groupId>org.seleniumhq.selenium</groupId>
                 <artifactId>selenium-bom</artifactId>
                 <version>${selenium.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-bom</artifactId>
+                <version>${allure.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -54,6 +63,11 @@
             <artifactId>selenium-support</artifactId>
         </dependency>
         <dependency>
+            <!-- Allure.step and attachments from the framework code; no AspectJ agent needed -->
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-java-commons</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
@@ -63,6 +77,11 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -87,6 +106,22 @@
                         <!-- No logging backend is used on purpose; silence the SLF4J "no providers" notice -->
                         <slf4j.internal.verbosity>ERROR</slf4j.internal.verbosity>
                     </systemPropertyVariables>
+                    <properties>
+                        <!-- Registered here, not in testng.xml, so that it also works with -Dtest=... -->
+                        <property>
+                            <name>listener</name>
+                            <value>io.github.piotrwaligora.e2e.listeners.RetryTransformer</value>
+                        </property>
+                    </properties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- mvn allure:serve (opens the report) or mvn allure:report (target/site/allure-maven-plugin) -->
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>${allure-maven.version}</version>
+                <configuration>
+                    <resultsDirectory>allure-results</resultsDirectory>
                 </configuration>
             </plugin>
         </plugins>

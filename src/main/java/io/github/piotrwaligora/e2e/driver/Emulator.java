@@ -22,8 +22,12 @@ public final class Emulator {
     private Emulator() {
     }
 
+    public static boolean isRunning() {
+        return adb("devices").contains("emulator-");
+    }
+
     public static void stop() {
-        if (!adb("devices").contains("emulator-")) {
+        if (!isRunning()) {
             return;
         }
         Log.info("[Emulator] Stopping the Android emulator");

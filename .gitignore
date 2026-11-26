@@ -4,9 +4,10 @@ target/
 # TestNG default report folder (tests run outside Maven)
 test-output/
 
-# Allure
+# Allure (results, report, commandline downloaded by allure-maven)
 allure-results/
 allure-report/
+.allure/
 
 # App builds (downloaded from GitHub releases, never committed)
 apps/

@@ -7,7 +7,7 @@ Work in progress: Android first, iOS next.
 
 ## Stack
 
-Java 25, Maven, TestNG, AssertJ, Appium 4 (java-client 11, UiAutomator2).
+Java 25, Maven, TestNG, AssertJ, Allure, Appium 4 (java-client 11, UiAutomator2).
 
 ## Run
 
@@ -23,6 +23,15 @@ No manual steps are needed before the run:
 - the tests start the Appium server before the suite and stop it at the end (`@BeforeSuite`/`@AfterSuite` in `BaseTest`, `AppiumServer`, log in `target/appium.log`);
   an Appium server that is already running, e.g. for the Inspector, is reused and left running;
 - Appium boots the emulator (`appium:avd` in the capabilities) when no device is running.
+
+Useful options:
+- `mvn test -Dretry.count=1`: retry a failed test once (used in CI);
+- `mvn test -Dandroid.emulator.shutdown=false`: keep the emulator running after the tests.
+
+Report:
+- console: every test with its progress (`STARTED [1/7]`, `PASSED [1/7]`) and the elements it waited for;
+- Allure: `mvn allure:serve` opens the report; a failed test has a screenshot and the page source
+  (XML of the screen) in its tear down.
 
 Configuration:
 - `src/main/resources/config.properties`: platform, Appium server, waits; every key can be overridden with `-Dkey=value`;
