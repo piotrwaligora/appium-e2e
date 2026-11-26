@@ -97,6 +97,9 @@ Sauce Labs Backpack 29.99, Bike Light 9.99, Bolt T-Shirt 15.99, Onesie 7.99, Tes
 and the fleece product, which differs: **"Sauce Labs Fleece Jacket" on Android, "Sauce Labs Fleece T-Shirt" on iOS** (49.99).
 Tests should avoid that product or keep names per platform.
 
+Android also lists color variants as separate catalog items, e.g. "Sauce Labs Backpack (green)", "(orange)", "(red)"
+(seen on the emulator in point 1). The catalog is longer than one screen, so tests need scrolling to reach later items.
+
 ## App state and reset
 
 - Android keeps the cart and the logged-in flag in memory (`SingletonClass`), products in a local Room database.
