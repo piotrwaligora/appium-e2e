@@ -102,6 +102,8 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
+                    <!-- Short failure traces in the console (test class frames only); full ones stay in surefire-reports -->
+                    <trimStackTrace>true</trimStackTrace>
                     <systemPropertyVariables>
                         <!-- No logging backend is used on purpose; silence the SLF4J "no providers" notice -->
                         <slf4j.internal.verbosity>ERROR</slf4j.internal.verbosity>
