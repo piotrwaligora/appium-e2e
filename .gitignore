@@ -1,0 +1,24 @@
+# Build output
+target/
+
+# Allure
+allure-results/
+allure-report/
+
+# App builds (downloaded from GitHub releases, never committed)
+apps/
+*.apk
+*.ipa
+*.app/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
