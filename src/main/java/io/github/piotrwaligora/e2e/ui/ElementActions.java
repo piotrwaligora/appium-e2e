@@ -1,7 +1,6 @@
 package io.github.piotrwaligora.e2e.ui;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.ios.IOSDriver;
 import io.github.piotrwaligora.e2e.Log;
 import io.github.piotrwaligora.e2e.config.TestConfig;
 import io.github.piotrwaligora.e2e.driver.Platform;
@@ -51,6 +50,12 @@ public class ElementActions {
         return waitUntil(customWait, by, ExpectedConditions.visibilityOfElementLocated(by));
     }
 
+    /** Waits until the element is in the screen tree, also when another element covers it. */
+    public WebElement waitForPresent(Map<Platform, By> locator) {
+        By by = findBy(locator);
+        return waitUntil(wait, by, ExpectedConditions.presenceOfElementLocated(by));
+    }
+
     /** Waits until the element is visible and enabled. */
     public WebElement waitForClickable(Map<Platform, By> locator) {
         By by = findBy(locator);
@@ -65,10 +70,6 @@ public class ElementActions {
         WebElement element = waitForClickable(locator);
         element.clear();
         element.sendKeys(text);
-        // The iOS keyboard stays open after typing and can cover the buttons below the field
-        if (driver instanceof IOSDriver ios && ios.isKeyboardShown()) {
-            ios.hideKeyboard();
-        }
     }
 
     public String getText(Map<Platform, By> locator) {
