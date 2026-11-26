@@ -1,6 +1,7 @@
 package io.github.piotrwaligora.e2e;
 
 import io.qameta.allure.Allure;
+import io.qameta.allure.model.Status;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -24,5 +25,11 @@ public final class Log {
     public static void step(String message) {
         info("      " + message); // aligned with the text after "===== "
         Allure.step(message);
+    }
+
+    /** A step inside a test that failed: logged like {@link #step} and marked as failed in the Allure report. */
+    public static void failedStep(String message) {
+        info("      " + message);
+        Allure.step(message, Status.FAILED);
     }
 }

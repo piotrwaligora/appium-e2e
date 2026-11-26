@@ -6,8 +6,10 @@ import io.github.piotrwaligora.e2e.config.TestConfig;
 import io.github.piotrwaligora.e2e.driver.Platform;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -37,22 +39,21 @@ public class ElementActions {
     /** Waits until the element is present and visible. */
     public WebElement waitFor(Map<Platform, By> locator) {
         By by = findBy(locator);
-        return found(by, wait.withMessage("element " + describe(by)).until(ExpectedConditions.visibilityOfElementLocated(by)));
+        return waitUntil(wait, by, ExpectedConditions.visibilityOfElementLocated(by));
     }
 
     /** Waits longer (or shorter) than the default timeout, for a screen that needs it. */
     public WebElement waitFor(Map<Platform, By> locator, Duration timeout) {
         By by = findBy(locator);
-        return found(by, new WebDriverWait(driver, timeout, TestConfig.polling())
-                .ignoring(StaleElementReferenceException.class)
-                .withMessage("element " + describe(by))
-                .until(ExpectedConditions.visibilityOfElementLocated(by)));
+        FluentWait<WebDriver> customWait = new WebDriverWait(driver, timeout, TestConfig.polling())
+                .ignoring(StaleElementReferenceException.class);
+        return waitUntil(customWait, by, ExpectedConditions.visibilityOfElementLocated(by));
     }
 
     /** Waits until the element is visible and enabled. */
     public WebElement waitForClickable(Map<Platform, By> locator) {
         By by = findBy(locator);
-        return found(by, wait.withMessage("clickable element " + describe(by)).until(ExpectedConditions.elementToBeClickable(by)));
+        return waitUntil(wait, by, ExpectedConditions.elementToBeClickable(by));
     }
 
     public void clickOn(Map<Platform, By> locator) {
@@ -91,10 +92,19 @@ public class ElementActions {
         return by;
     }
 
-    /** Logs the element found by a wait, e.g. {@code Waiting for: [ANDROID] AppiumBy.id: productTV -> ok}. */
-    private static WebElement found(By by, WebElement element) {
-        Log.step("Waiting for: " + describe(by) + " -> ok");
-        return element;
+    /**
+     * Waits for the element and logs the result as a step, e.g.
+     * {@code Waiting for: [ANDROID] AppiumBy.id: productTV -> ok} or {@code ... -> not found}.
+     */
+    private static WebElement waitUntil(FluentWait<WebDriver> wait, By by, ExpectedCondition<WebElement> condition) {
+        try {
+            WebElement element = wait.withMessage("element " + describe(by)).until(condition);
+            Log.step("Waiting for: " + describe(by) + " -> ok");
+            return element;
+        } catch (TimeoutException e) {
+            Log.failedStep("Waiting for: " + describe(by) + " -> not found");
+            throw e;
+        }
     }
 
     /** Locator with its platform for timeout messages, e.g. {@code [ANDROID] By.id: productTV}. */
