@@ -6,6 +6,9 @@ import io.github.piotrwaligora.e2e.driver.AppiumServer;
 import io.github.piotrwaligora.e2e.driver.DriverFactory;
 import io.github.piotrwaligora.e2e.driver.Emulator;
 import io.github.piotrwaligora.e2e.driver.Platform;
+import io.qameta.allure.Allure;
+import io.qameta.allure.AttachmentOptions;
+import org.openqa.selenium.OutputType;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -14,14 +17,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The Appium server runs once for the whole suite; each test gets its own Appium session
  * (the app is installed and started) that is closed after the test. After the suite the Android
  * emulator is stopped as well ({@code android.emulator.shutdown}), so the next run boots a fresh one.
- * The start and the result of every test are written to the test log.
+ * The start and the result of every test are written to the test log; a failed test gets
+ * a screenshot and the page source in the Allure report.
  */
 public abstract class BaseTest {
 
@@ -55,10 +61,30 @@ public abstract class BaseTest {
     public void closeSession(ITestResult result) {
         Log.info("===== " + status(result) + " " + progress + " " + testName(result.getMethod().getConstructorOrMethod().getMethod())
                 + " (" + (result.getEndMillis() - result.getStartMillis()) / 1000 + " s)");
-        if (driver != null) {
+        if (result.wasRetried()) {
+            TEST_COUNTER.decrementAndGet(); // the retry runs under the same number
+        }
+        if (driver == null) {
+            return;
+        }
+        try {
+            if (!result.isSuccess()) {
+                attachAppState();
+            }
+        } finally {
             driver.quit();
             driver = null;
         }
+    }
+
+    /** Screenshot and page source (XML of the screen) in the Allure report, to find out why a test failed. */
+    private void attachAppState() {
+        byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);
+        Allure.attachment("Screenshot on failure", "image/png", new ByteArrayInputStream(screenshot),
+                AttachmentOptions.withFileExtension(".png"));
+        Allure.attachment("Page source on failure", "text/xml",
+                new ByteArrayInputStream(driver.getPageSource().getBytes(StandardCharsets.UTF_8)),
+                AttachmentOptions.withFileExtension(".xml"));
     }
 
     private static String testName(Method method) {
@@ -69,7 +95,7 @@ public abstract class BaseTest {
         return switch (result.getStatus()) {
             case ITestResult.SUCCESS -> "PASSED";
             case ITestResult.FAILURE -> "FAILED";
-            case ITestResult.SKIP -> "SKIPPED";
+            case ITestResult.SKIP -> result.wasRetried() ? "RETRY" : "SKIPPED";
             default -> "FINISHED";
         };
     }

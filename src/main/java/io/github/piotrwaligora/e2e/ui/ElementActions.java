@@ -77,7 +77,7 @@ public class ElementActions {
     /** Waits for a system alert (e.g. an iOS validation message) and returns its text. */
     public String getAlertText() {
         String text = wait.withMessage("alert").until(ExpectedConditions.alertIsPresent()).getText();
-        Log.info("Waiting for: alert -> ok, text: " + text);
+        Log.step("Waiting for: alert -> ok, text: " + text);
         return text;
     }
 
@@ -93,7 +93,7 @@ public class ElementActions {
 
     /** Logs the element found by a wait, e.g. {@code Waiting for: [ANDROID] AppiumBy.id: productTV -> ok}. */
     private static WebElement found(By by, WebElement element) {
-        Log.info("Waiting for: " + describe(by) + " -> ok");
+        Log.step("Waiting for: " + describe(by) + " -> ok");
         return element;
     }
 

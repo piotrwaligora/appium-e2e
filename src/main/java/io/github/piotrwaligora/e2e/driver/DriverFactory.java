@@ -3,6 +3,7 @@ package io.github.piotrwaligora.e2e.driver;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
+import io.github.piotrwaligora.e2e.Log;
 import io.github.piotrwaligora.e2e.config.TestConfig;
 import org.openqa.selenium.json.Json;
 
@@ -32,7 +33,13 @@ public final class DriverFactory {
 
     public static AppiumDriver createDriver() {
         return switch (TestConfig.platform()) {
-            case ANDROID -> new AndroidDriver(AppiumServer.url(), new UiAutomator2Options(capabilities("android")));
+            case ANDROID -> {
+                if (!Emulator.isRunning()) {
+                    // Appium boots the emulator from the appium:avd capability while creating the session
+                    Log.info("[Emulator] Starting the Android emulator (cold boot by Appium, about 1 min)");
+                }
+                yield new AndroidDriver(AppiumServer.url(), new UiAutomator2Options(capabilities("android")));
+            }
             case IOS -> throw new UnsupportedOperationException("iOS support comes in roadmap point 7");
         };
     }
