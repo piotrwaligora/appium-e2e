@@ -3,6 +3,8 @@ package io.github.piotrwaligora.e2e.driver;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
+import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.ios.options.XCUITestOptions;
 import io.github.piotrwaligora.e2e.Log;
 import io.github.piotrwaligora.e2e.config.TestConfig;
 import org.openqa.selenium.json.Json;
@@ -21,8 +23,11 @@ import java.util.Map;
  * Capabilities come from {@code capabilities/<platform>.json} on the classpath, in the same format
  * as in the Appium Inspector. A relative {@code appium:app} path is resolved against the project directory.
  * <p>
+ * Any capability can be overridden with a system property of the same name, e.g. {@code -Dappium:udid=...}.
+ * <p>
  * Android: {@code appium:avd} makes Appium boot that emulator when no device is running;
  * the app opens a splash screen first, hence the wildcard in {@code appium:appWaitActivity}.
+ * iOS: Appium boots the simulator named in {@code appium:deviceName} and installs the app from the zip.
  */
 public final class DriverFactory {
 
@@ -40,13 +45,17 @@ public final class DriverFactory {
                 }
                 yield new AndroidDriver(AppiumServer.url(), new UiAutomator2Options(capabilities("android")));
             }
-            case IOS -> throw new UnsupportedOperationException("iOS support comes in roadmap point 7");
+            case IOS -> new IOSDriver(AppiumServer.url(), new XCUITestOptions(capabilities("ios")));
         };
     }
 
     private static Map<String, Object> capabilities(String platform) {
         String file = "capabilities/" + platform + ".json";
         Map<String, Object> capabilities = new HashMap<>(new Json().toType(readResource(file), Json.MAP_TYPE));
+        // Any capability can be overridden from the command line, e.g. -Dappium:udid=... in CI
+        System.getProperties().stringPropertyNames().stream()
+                .filter(key -> key.startsWith("appium:"))
+                .forEach(key -> capabilities.put(key, System.getProperty(key)));
         capabilities.computeIfPresent(APP, (key, value) -> resolveApp(value.toString()));
         return capabilities;
     }
