@@ -13,8 +13,10 @@ import static io.github.piotrwaligora.e2e.driver.Platform.IOS;
 /** Details of one product, opened from the catalog. */
 public class ProductDetailsPage extends BasePage {
 
-    // iOS: the product name has no identifier; to be taken from the page source in CI
+    // iOS: the name label has no identifier, so it is found by the product name prefix (to be confirmed in CI)
     private static final Map<Platform, By> NAME = Map.of(
+            IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText'"
+                    + " AND (label BEGINSWITH 'Sauce Labs' OR label BEGINSWITH 'Test.allTheThings()')"),
             ANDROID, AppiumBy.id("productTV"));
 
     private static final Map<Platform, By> PRICE = Map.of(

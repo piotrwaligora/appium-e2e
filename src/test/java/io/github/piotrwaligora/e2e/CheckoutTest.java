@@ -28,7 +28,7 @@ public class CheckoutTest extends BaseTest {
                 .enterCard(CARD);
 
         // Backpack $29.99 + delivery $5.99
-        assertThat(review.getTotal()).as("order total").isEqualTo("$ 35.98");
+        assertThat(review.getTotal()).as("order total").isEqualTo("$35.98");
         assertThat(review.placeOrder().getTitle()).as("confirmation").isEqualTo("Checkout Complete");
     }
 }

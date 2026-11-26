@@ -13,8 +13,11 @@ import static io.github.piotrwaligora.e2e.driver.Platform.IOS;
 /** Checkout, step 3: order summary before placing the order. */
 public class ReviewOrderPage extends BasePage {
 
-    // iOS: the total has no identifier; to be taken from the page source in CI
+    // iOS: the total has no identifier. Product prices are "$ 29.99" (with a space), delivery "$5.99",
+    // the total "$35.98" (to be confirmed in CI)
     private static final Map<Platform, By> TOTAL = Map.of(
+            IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText'"
+                    + " AND label BEGINSWITH '$' AND NOT label BEGINSWITH '$ ' AND label != '$5.99'"),
             ANDROID, AppiumBy.id("totalAmountTV"));
 
     private static final Map<Platform, By> PLACE_ORDER_BUTTON = Map.of(
@@ -30,8 +33,9 @@ public class ReviewOrderPage extends BasePage {
         return this;
     }
 
+    /** Total without spaces, e.g. "$35.98": Android shows "$ 35.98", iOS "$35.98". */
     public String getTotal() {
-        return actions.getText(TOTAL);
+        return actions.getText(TOTAL).replace(" ", "");
     }
 
     public CheckoutCompletePage placeOrder() {

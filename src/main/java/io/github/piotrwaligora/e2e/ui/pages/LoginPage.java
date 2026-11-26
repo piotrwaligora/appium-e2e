@@ -14,7 +14,7 @@ import static io.github.piotrwaligora.e2e.driver.Platform.IOS;
 /** Login form, opened from the menu or when a guest proceeds to checkout. */
 public class LoginPage extends BasePage {
 
-    // iOS: the login fields have no identifiers; to be confirmed in the page source in CI
+    // iOS: the login fields have no identifiers; the screen has one text field and one secure (password) field
     private static final Map<Platform, By> USERNAME = Map.of(
             IOS, AppiumBy.iOSClassChain("**/XCUIElementTypeTextField"),
             ANDROID, AppiumBy.id("nameET"));
