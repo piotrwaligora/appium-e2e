@@ -236,6 +236,8 @@ jobs:
 
       # allure:report reads target/allure-results and writes target/site/allure-maven-plugin,
       # so it runs once per platform; a platform whose job uploaded no results is left out.
+      # History and trends: allure-maven appends each report to .allure/history/report/history.jsonl.
+      # Each platform's file is published next to its report and downloaded again by the next run.
       - name: Generate Allure reports
         run: |
           mkdir -p site
@@ -244,11 +246,15 @@ jobs:
               echo "No results for $platform"
               continue
             fi
-            rm -rf target/allure-results target/site/allure-maven-plugin
-            mkdir -p target
+            rm -rf target/allure-results target/site/allure-maven-plugin .allure/history
+            mkdir -p target .allure/history/report
             cp -r "results/allure-results-$platform" target/allure-results
+            curl -sfL "${{ env.REPORT_URL }}$platform/history.jsonl" -o .allure/history/report/history.jsonl \
+              || { echo "No published history for $platform yet"; rm -f .allure/history/report/history.jsonl; }
             mvn -B allure:report
             cp -r target/site/allure-maven-plugin "site/$platform"
+            cp .allure/history/report/history.jsonl "site/$platform/history.jsonl"
+            echo "$platform history: $(wc -l < "site/$platform/history.jsonl") run(s)"
           done
           cp .github/pages/index.html site/index.html
 
