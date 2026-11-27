@@ -11,17 +11,18 @@ import java.util.Map;
 import static io.github.piotrwaligora.e2e.driver.Platform.ANDROID;
 import static io.github.piotrwaligora.e2e.driver.Platform.IOS;
 
-/** Login form, opened from the menu or when a guest proceeds to checkout. */
+/**
+ * Login form, opened from the menu or when a guest proceeds to checkout.
+ * Both apps list test users under the form; tapping one fills in the user name and the password.
+ * The tests use that list instead of typing: the iOS app cannot hide the on-screen keyboard,
+ * which then covers the Login button.
+ */
 public class LoginPage extends BasePage {
 
-    // iOS: the login fields have no identifiers; the screen has one text field and one secure (password) field
-    private static final Map<Platform, By> USERNAME = Map.of(
-            IOS, AppiumBy.iOSClassChain("**/XCUIElementTypeTextField"),
-            ANDROID, AppiumBy.id("nameET"));
-
-    private static final Map<Platform, By> PASSWORD = Map.of(
-            IOS, AppiumBy.iOSClassChain("**/XCUIElementTypeSecureTextField"),
-            ANDROID, AppiumBy.id("passwordET"));
+    /** First user of the list: Android "bod@example.com", iOS "bob@example.com" (password 10203040). */
+    private static final Map<Platform, By> FIRST_LISTED_USER = Map.of(
+            IOS, AppiumBy.accessibilityId("bob@example.com"),
+            ANDROID, AppiumBy.id("username1TV"));
 
     private static final Map<Platform, By> LOGIN_BUTTON = Map.of(
             IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeButton' AND label == 'Login'"),
@@ -39,13 +40,15 @@ public class LoginPage extends BasePage {
         return this;
     }
 
-    /** Fills in the form and submits it; the next screen depends on where the login was opened from. */
-    public void login(String username, String password) {
-        if (!username.isEmpty()) {
-            actions.type(USERNAME, username);
-        }
-        actions.type(PASSWORD, password);
+    /** Logs in as the first listed user; the next screen depends on where the login was opened from. */
+    public void loginAsListedUser() {
+        actions.clickOn(FIRST_LISTED_USER);
+        submit();
+    }
+
+    public LoginPage submit() {
         actions.clickOn(LOGIN_BUTTON);
+        return this;
     }
 
     /** Android shows the error under the field, iOS in an alert. */

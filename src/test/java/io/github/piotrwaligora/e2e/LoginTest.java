@@ -5,7 +5,6 @@ import io.github.piotrwaligora.e2e.ui.pages.LoginPage;
 import io.github.piotrwaligora.e2e.ui.pages.NavigationBar;
 import org.testng.annotations.Test;
 
-import static io.github.piotrwaligora.e2e.data.TestData.STANDARD_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LoginTest extends BaseTest {
@@ -15,7 +14,7 @@ public class LoginTest extends BaseTest {
         new CatalogPage(driver).waitUntilLoaded();
         new NavigationBar(driver).openMenu()
                 .openLogin()
-                .login(STANDARD_USER.username(), STANDARD_USER.password());
+                .loginAsListedUser();
 
         new CatalogPage(driver).waitUntilLoaded();
         boolean logOutAvailable = new NavigationBar(driver).openMenu().isLogOutAvailable();
@@ -23,12 +22,12 @@ public class LoginTest extends BaseTest {
         assertThat(logOutAvailable).as("log out in the menu").isTrue();
     }
 
-    @Test(description = "Login without a username is rejected with a message")
+    @Test(description = "Login with an empty form is rejected: the username is required")
     public void shouldRequireUsername() {
         new CatalogPage(driver).waitUntilLoaded();
         LoginPage login = new NavigationBar(driver).openMenu().openLogin();
 
-        login.login("", STANDARD_USER.password());
+        login.submit();
 
         assertThat(login.getUsernameError()).as("username error").contains("Username is required");
     }

@@ -3,17 +3,11 @@ package io.github.piotrwaligora.e2e.data;
 /** Test data of the demo app: users, products, a shipping address and a payment card. */
 public final class TestData {
 
-    public record User(String username, String password) {
-    }
-
     public record Address(String fullName, String addressLine, String city, String zipCode, String country) {
     }
 
     public record PaymentCard(String holder, String number, String expiration, String securityCode) {
     }
-
-    /** User listed on the login screen of the app. */
-    public static final User STANDARD_USER = new User("bod@example.com", "10203040");
 
     public static final String BACKPACK = "Sauce Labs Backpack";
     public static final String BACKPACK_PRICE = "$ 29.99";

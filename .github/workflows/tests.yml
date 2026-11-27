@@ -157,6 +157,9 @@ jobs:
                       best = (key, device["udid"], version, device["name"])
           print(best[1], best[2], best[3])')
           echo "Simulator: $SIM_NAME, iOS $SIM_VERSION, $SIM_UDID"
+          # Hardware keyboard on: the on-screen keyboard stays hidden (the app cannot dismiss it)
+          defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool true
+          defaults write com.apple.iphonesimulator DevicePreferences -dict-add "$SIM_UDID" '{ ConnectHardwareKeyboard = 1; }'
           {
             echo "SIM_UDID=$SIM_UDID"
             echo "SIM_VERSION=$SIM_VERSION"
