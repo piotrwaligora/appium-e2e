@@ -114,6 +114,11 @@
                             <name>listener</name>
                             <value>io.github.piotrwaligora.e2e.listeners.RetryTransformer</value>
                         </property>
+                        <property>
+                            <!-- Also for -Dtest=..., which does not use testng.xml -->
+                            <name>configfailurepolicy</name>
+                            <value>continue</value>
+                        </property>
                     </properties>
                 </configuration>
             </plugin>

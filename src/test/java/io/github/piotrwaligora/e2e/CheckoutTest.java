@@ -9,10 +9,13 @@ import org.testng.annotations.Test;
 import static io.github.piotrwaligora.e2e.data.TestData.ADDRESS;
 import static io.github.piotrwaligora.e2e.data.TestData.BACKPACK;
 import static io.github.piotrwaligora.e2e.data.TestData.CARD;
+import static io.github.piotrwaligora.e2e.driver.Platform.ANDROID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CheckoutTest extends BaseTest {
 
+    @Platforms(value = ANDROID, reason = "iOS app issue: the on-screen keyboard cannot be dismissed"
+            + " and covers the To Payment button of the shipping address form")
     @Test(description = "Guest adds a product, logs in at checkout and places the order")
     public void shouldPlaceOrder() {
         new CatalogPage(driver).waitUntilLoaded()
