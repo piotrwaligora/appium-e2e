@@ -164,14 +164,20 @@ jobs:
             echo "SIM_NAME=$SIM_NAME"
           } >> "$GITHUB_ENV"
 
-      # WebDriverAgent is built once before the tests, so the first session does not wait for the build.
-      - name: Build WebDriverAgent
-        run: appium driver run xcuitest build-wda
+      # A prebuilt WebDriverAgent for simulators instead of building it with xcodebuild (about 5 minutes);
+      # the tests get it with -Dappium:usePreinstalledWDA and -Dappium:prebuiltWDAPath.
+      - name: Download prebuilt WebDriverAgent
+        run: |
+          appium driver run xcuitest download-wda -- --kind=sim --platform=iOS --outdir="$RUNNER_TEMP/wda"
+          WDA_APP=$(find "$RUNNER_TEMP/wda" -maxdepth 3 -name 'WebDriverAgentRunner-Runner.app' | head -1)
+          echo "WebDriverAgent: $WDA_APP"
+          echo "WDA_APP=$WDA_APP" >> "$GITHUB_ENV"
 
       - name: Run tests on the iOS simulator
         run: >
           mvn -B test -Dplatform=ios -Dretry.count=1
           "-Dappium:udid=$SIM_UDID" "-Dappium:platformVersion=$SIM_VERSION" "-Dappium:deviceName=$SIM_NAME"
+          "-Dappium:usePreinstalledWDA=true" "-Dappium:prebuiltWDAPath=$WDA_APP"
 
       - name: Upload Allure results
         if: always()

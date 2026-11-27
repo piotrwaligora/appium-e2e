@@ -55,9 +55,14 @@ public final class DriverFactory {
         // Any capability can be overridden from the command line, e.g. -Dappium:udid=... in CI
         System.getProperties().stringPropertyNames().stream()
                 .filter(key -> key.startsWith("appium:"))
-                .forEach(key -> capabilities.put(key, System.getProperty(key)));
+                .forEach(key -> capabilities.put(key, value(System.getProperty(key))));
         capabilities.computeIfPresent(APP, (key, value) -> resolveApp(value.toString()));
         return capabilities;
+    }
+
+    /** "true" and "false" become booleans, as in the JSON files; anything else stays text. */
+    private static Object value(String text) {
+        return text.equals("true") || text.equals("false") ? Boolean.parseBoolean(text) : text;
     }
 
     private static String resolveApp(String path) {
