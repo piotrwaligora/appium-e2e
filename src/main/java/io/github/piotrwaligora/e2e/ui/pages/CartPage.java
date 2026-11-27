@@ -14,8 +14,8 @@ import static io.github.piotrwaligora.e2e.driver.Platform.IOS;
 public class CartPage extends BasePage {
 
     private static final Map<Platform, By> REMOVE_BUTTON = Map.of(
-            IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeButton' AND label == 'Remove Item'"),
-            ANDROID, AppiumBy.id("removeBt"));
+            IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeButton' AND label == 'Fake Remove Item'"),
+            ANDROID, AppiumBy.id("fakeRemoveBt"));
 
     private static final Map<Platform, By> EMPTY_CART_TITLE = Map.of(
             IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText' AND label == 'No Items'"),
