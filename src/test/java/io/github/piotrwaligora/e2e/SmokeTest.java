@@ -10,7 +10,7 @@ public class SmokeTest extends BaseTest {
 
     @Test(description = "App starts and shows the product catalog")
     public void shouldShowCatalogAfterStart() {
-        CatalogPage catalog = new CatalogPage(driver).waitUntilLoaded();
+        CatalogPage catalog = new CatalogPage(driver()).waitUntilLoaded();
 
         assertThat(catalog.containsProduct(BACKPACK)).as("product in the catalog").isTrue();
     }

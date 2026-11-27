@@ -18,14 +18,14 @@ public class CheckoutTest extends BaseTest {
             + " and covers the To Payment button of the shipping address form")
     @Test(description = "Guest adds a product, logs in at checkout and places the order")
     public void shouldPlaceOrder() {
-        new CatalogPage(driver).waitUntilLoaded()
+        new CatalogPage(driver()).waitUntilLoaded()
                 .openProduct(BACKPACK)
                 .addToCart();
-        new NavigationBar(driver).openCart()
+        new NavigationBar(driver()).openCart()
                 .proceedToCheckoutAsGuest()
                 .loginAsListedUser();
 
-        ReviewOrderPage review = new ShippingAddressPage(driver).waitUntilLoaded()
+        ReviewOrderPage review = new ShippingAddressPage(driver()).waitUntilLoaded()
                 .enterAddress(ADDRESS)
                 .enterCard(CARD);
 

@@ -67,7 +67,8 @@ Java 25, Maven, TestNG, AssertJ, Allure, Appium 4 (java-client 11, UiAutomator2,
 
   A wait that times out is logged as `Waiting for: ... -> not found` and marked as a failed step in the report.
 - **Failures:** a failed test gets a screenshot and the page source (XML of the screen) in the Allure report;
-  `retry.count=1` retries it once (used in CI).
+  `retry.count=1` retries it once (used in CI). A session that does not start is tried once more; if it fails
+  again, the test fails with the reason (it is not skipped), so the retry covers it too.
 
 ## Platform differences handled in the page objects
 

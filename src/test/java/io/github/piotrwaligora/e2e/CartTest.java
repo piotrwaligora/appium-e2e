@@ -12,10 +12,10 @@ public class CartTest extends BaseTest {
 
     @Test(description = "Product added from its details is counted in the header and listed in the cart")
     public void shouldAddProductToCart() {
-        new CatalogPage(driver).waitUntilLoaded()
+        new CatalogPage(driver()).waitUntilLoaded()
                 .openProduct(BACKPACK)
                 .addToCart();
-        NavigationBar navigation = new NavigationBar(driver);
+        NavigationBar navigation = new NavigationBar(driver());
 
         assertThat(navigation.getCartCount()).as("cart count").isEqualTo("1");
         assertThat(navigation.openCart().containsProduct(BACKPACK)).as("product in cart").isTrue();
@@ -23,11 +23,11 @@ public class CartTest extends BaseTest {
 
     @Test(description = "Removing the only product leaves the cart empty")
     public void shouldRemoveProductFromCart() {
-        new CatalogPage(driver).waitUntilLoaded()
+        new CatalogPage(driver()).waitUntilLoaded()
                 .openProduct(BACKPACK)
                 .addToCart();
 
-        CartPage cart = new NavigationBar(driver).openCart().removeProduct();
+        CartPage cart = new NavigationBar(driver()).openCart().removeProduct();
 
         assertThat(cart.getEmptyCartTitle()).as("empty cart title").isEqualTo("No Items");
     }
