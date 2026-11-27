@@ -26,8 +26,9 @@ public class CatalogPage extends BasePage {
         return this;
     }
 
-    public String getTitle() {
-        return actions.getText(TITLE);
+    /** iOS product names have the color appended ("Sauce Labs Backpack - Black"), so the name is a prefix. */
+    public boolean containsProduct(String name) {
+        return actions.waitFor(productByName(name)).isDisplayed();
     }
 
     /** Opens a product shown on the first screen of the catalog (scrolling comes with the scenarios that need it). */
@@ -36,10 +37,13 @@ public class CatalogPage extends BasePage {
         return new ProductDetailsPage(driver).waitUntilLoaded();
     }
 
-    /** Android: only the product image opens the details, so the image next to the name is used. */
+    /**
+     * Android: only the product image opens the details, so the image next to the name is used.
+     * iOS: product names have the color appended ("Sauce Labs Backpack - Black"), so the name is a prefix.
+     */
     private static Map<Platform, By> productByName(String name) {
         return Map.of(
-                IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText' AND label == '" + name + "'"),
+                IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText' AND label BEGINSWITH '" + name + "'"),
                 ANDROID, AppiumBy.androidUIAutomator("new UiSelector().resourceIdMatches(\".*:id/titleTV\")"
                         + ".text(\"" + name + "\").fromParent(new UiSelector().resourceIdMatches(\".*:id/productIV\"))"));
     }

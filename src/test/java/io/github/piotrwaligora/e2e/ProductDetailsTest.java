@@ -13,7 +13,8 @@ public class ProductDetailsTest extends BaseTest {
         ProductDetailsPage details = new CatalogPage(driver).waitUntilLoaded()
                 .openProduct("Sauce Labs Backpack");
 
-        assertThat(details.getName()).as("product name").isEqualTo("Sauce Labs Backpack");
+        // iOS appends the color to the name: "Sauce Labs Backpack - Black"
+        assertThat(details.getName()).as("product name").startsWith("Sauce Labs Backpack");
         assertThat(details.getPrice()).as("product price").isEqualTo("$ 29.99");
     }
 }

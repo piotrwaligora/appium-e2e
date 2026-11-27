@@ -50,6 +50,12 @@ public class ElementActions {
         return waitUntil(customWait, by, ExpectedConditions.visibilityOfElementLocated(by));
     }
 
+    /** Waits until the element is in the screen tree, also when another element covers it. */
+    public WebElement waitForPresent(Map<Platform, By> locator) {
+        By by = findBy(locator);
+        return waitUntil(wait, by, ExpectedConditions.presenceOfElementLocated(by));
+    }
+
     /** Waits until the element is visible and enabled. */
     public WebElement waitForClickable(Map<Platform, By> locator) {
         By by = findBy(locator);

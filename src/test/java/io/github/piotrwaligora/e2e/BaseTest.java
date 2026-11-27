@@ -54,6 +54,8 @@ public abstract class BaseTest {
     public void startSession(Method method, ITestContext context) {
         progress = "[" + TEST_COUNTER.incrementAndGet() + "/" + context.getAllTestMethods().length + "]";
         Log.info("===== STARTED " + progress + " " + testName(method) + ": " + method.getAnnotation(Test.class).description());
+        // Tells Android and iOS results of the same test apart in the combined Allure report
+        Allure.parameter("platform", TestConfig.platform());
         driver = DriverFactory.createDriver();
     }
 

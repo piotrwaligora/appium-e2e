@@ -43,7 +43,7 @@ jobs:
           java-version: '25'
           cache: maven
 
-      # Node runs the Appium server (started by the tests) and the Allure report generator.
+      # Node runs the Appium server (started by the tests).
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
@@ -58,7 +58,7 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: ./scripts/download-apps.ps1
+        run: ./scripts/download-apps.ps1 android
 
       # The AVD has the same name as locally, so appium:avd in android.json finds the running emulator.
       # The emulator is managed here, so the tests do not stop it; one retry absorbs emulator hiccups.
@@ -75,37 +75,11 @@ jobs:
           disable-animations: true
           script: mvn -B test -Dretry.count=1 -Dandroid.emulator.shutdown=false
 
-      - name: Generate Allure report
-        if: always()
-        run: mvn -B allure:report
-
-      - name: Add report link to the run summary
-        if: always()
-        run: |
-          echo "### Allure report" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Latest report from \`main\`: ${{ env.REPORT_URL }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Report of this run: download the \`allure-report\` artifact below" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload report for GitHub Pages
-        if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: target/site/allure-maven-plugin
-
-      - name: Upload Allure report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: allure-report
-          path: target/site/allure-maven-plugin
-          if-no-files-found: warn
-          retention-days: 14
-
       - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: allure-results
+          name: allure-results-android
           path: target/allure-results
           if-no-files-found: warn
           retention-days: 14
@@ -115,7 +89,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: failures
+          name: failures-android
           path: |
             target/allure-results/*.png
             target/allure-results/*.xml
@@ -126,18 +100,169 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: logs
+          name: logs-android
           path: |
             target/appium.log
             target/surefire-reports
           if-no-files-found: warn
           retention-days: 14
 
+  ios:
+    name: iOS tests
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install Appium and the XCUITest driver
+        run: |
+          npm install -g appium@4.0.1
+          appium driver install xcuitest@13.8.0
+
+      - name: Download the app under test
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/download-apps.ps1 ios
+
+      # Picks an iPhone simulator with the newest iOS installed on the runner and boots it;
+      # the tests get it with -Dappium:udid (see DriverFactory).
+      - name: Boot an iPhone simulator
+        run: |
+          read -r SIM_UDID SIM_VERSION SIM_NAME < <(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          best = None
+          for runtime, devices in json.load(sys.stdin)["devices"].items():
+              if ".iOS-" not in runtime:
+                  continue
+              version = runtime.split(".iOS-")[-1].replace("-", ".")
+              key = tuple(int(part) for part in version.split("."))
+              for device in devices:
+                  if device["name"].startswith("iPhone") and (best is None or key > best[0]):
+                      best = (key, device["udid"], version, device["name"])
+          print(best[1], best[2], best[3])')
+          echo "Simulator: $SIM_NAME, iOS $SIM_VERSION, $SIM_UDID"
+          xcrun simctl boot "$SIM_UDID"
+          xcrun simctl bootstatus "$SIM_UDID" -b
+          {
+            echo "SIM_UDID=$SIM_UDID"
+            echo "SIM_VERSION=$SIM_VERSION"
+            echo "SIM_NAME=$SIM_NAME"
+          } >> "$GITHUB_ENV"
+
+      # WebDriverAgent is built once before the tests, so the first session does not wait for the build.
+      - name: Build WebDriverAgent
+        run: appium driver run xcuitest build-wda
+
+      - name: Run tests on the iOS simulator
+        run: >
+          mvn -B test -Dplatform=ios -Dretry.count=1
+          "-Dappium:udid=$SIM_UDID" "-Dappium:platformVersion=$SIM_VERSION" "-Dappium:deviceName=$SIM_NAME"
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-results-ios
+          path: target/allure-results
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure screenshots and page sources
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: failures-ios
+          path: |
+            target/allure-results/*.png
+            target/allure-results/*.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: logs-ios
+          path: |
+            target/appium.log
+            target/surefire-reports
+          if-no-files-found: warn
+          retention-days: 14
+
+  # One Allure report with the results of both platforms (each test has a "platform" parameter).
+  report:
+    name: Allure report
+    needs: [android, ios]
+    if: always() && needs.android.result != 'cancelled' && needs.ios.result != 'cancelled'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # The Allure report generator runs on Node.
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Download Allure results of both platforms
+        uses: actions/download-artifact@v8
+        with:
+          pattern: allure-results-*
+          path: target/allure-results
+          merge-multiple: true
+
+      - name: Generate Allure report
+        run: mvn -B allure:report
+
+      - name: Add report link to the run summary
+        run: |
+          echo "### Allure report (Android and iOS)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Latest report from \`main\`: ${{ env.REPORT_URL }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Report of this run: download the \`allure-report\` artifact below" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report
+          path: target/site/allure-maven-plugin
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload report for GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: target/site/allure-maven-plugin
+
   # Publishes the Allure report of main (merge, schedule or manual run) to GitHub Pages, also when tests fail.
   publish-report:
     name: Publish Allure report
-    needs: android
-    if: always() && needs.android.result != 'cancelled' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: report
+    if: always() && needs.report.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write

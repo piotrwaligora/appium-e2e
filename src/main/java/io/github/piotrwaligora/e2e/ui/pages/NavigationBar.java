@@ -24,7 +24,7 @@ public class NavigationBar extends BasePage {
             IOS, AppiumBy.accessibilityId("Cart-tab-item"),
             ANDROID, AppiumBy.accessibilityId("View cart"));
 
-    // iOS: the count label has no identifier: a number that is not the product quantity "Amount" (to be confirmed in CI)
+    // iOS: the count label has no identifier; its name is the number, unlike the product quantity "Amount"
     private static final Map<Platform, By> CART_COUNT = Map.of(
             IOS, AppiumBy.iOSNsPredicateString("type == 'XCUIElementTypeStaticText' AND name != 'Amount' AND label MATCHES '^[0-9]+$'"),
             ANDROID, AppiumBy.id("cartTV"));
@@ -43,7 +43,8 @@ public class NavigationBar extends BasePage {
         return new CartPage(driver);
     }
 
+    /** iOS reports the count as not visible (the cart tab button covers it), so it is read when present. */
     public String getCartCount() {
-        return actions.getText(CART_COUNT);
+        return actions.waitForPresent(CART_COUNT).getText();
     }
 }

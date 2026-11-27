@@ -9,7 +9,6 @@ import org.testng.annotations.Test;
 import static io.github.piotrwaligora.e2e.data.TestData.ADDRESS;
 import static io.github.piotrwaligora.e2e.data.TestData.BACKPACK;
 import static io.github.piotrwaligora.e2e.data.TestData.CARD;
-import static io.github.piotrwaligora.e2e.data.TestData.STANDARD_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CheckoutTest extends BaseTest {
@@ -21,7 +20,7 @@ public class CheckoutTest extends BaseTest {
                 .addToCart();
         new NavigationBar(driver).openCart()
                 .proceedToCheckoutAsGuest()
-                .login(STANDARD_USER.username(), STANDARD_USER.password());
+                .loginAsListedUser();
 
         ReviewOrderPage review = new ShippingAddressPage(driver).waitUntilLoaded()
                 .enterAddress(ADDRESS)
