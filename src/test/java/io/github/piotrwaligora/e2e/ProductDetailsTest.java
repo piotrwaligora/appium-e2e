@@ -10,7 +10,7 @@ public class ProductDetailsTest extends BaseTest {
 
     @Test(description = "Product opened from the catalog shows its name and price")
     public void shouldShowProductDetails() {
-        ProductDetailsPage details = new CatalogPage(driver).waitUntilLoaded()
+        ProductDetailsPage details = new CatalogPage(driver()).waitUntilLoaded()
                 .openProduct("Sauce Labs Backpack");
 
         // iOS appends the color to the name: "Sauce Labs Backpack - Black"

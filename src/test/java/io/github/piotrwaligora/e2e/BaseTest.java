@@ -36,7 +36,8 @@ public abstract class BaseTest {
     /** Number of the test in the run, for the progress in the log: [1/10], [2/10], ... */
     private static final AtomicInteger TEST_COUNTER = new AtomicInteger();
 
-    protected AppiumDriver driver;
+    private AppiumDriver driver;
+    private RuntimeException sessionError;
     private String progress;
 
     @BeforeSuite
@@ -59,7 +60,39 @@ public abstract class BaseTest {
         // Tells Android and iOS results of the same test apart in the combined Allure report
         Allure.parameter("platform", TestConfig.platform());
         skipOnOtherPlatforms(method);
-        driver = DriverFactory.createDriver();
+        startAppiumSession();
+    }
+
+    /** Appium session of the current test; tests and page objects use it through this method. */
+    protected AppiumDriver driver() {
+        if (driver == null) {
+            throw new IllegalStateException("No Appium session: " + firstLine(sessionError), sessionError);
+        }
+        return driver;
+    }
+
+    /**
+     * Starts the session, with one more attempt when it does not start (e.g. WebDriverAgent on a CI
+     * simulator). If it fails again, the error is kept and the test fails in {@link #driver()}:
+     * an exception thrown here would make TestNG skip the test instead, without a retry.
+     */
+    private void startAppiumSession() {
+        sessionError = null;
+        try {
+            driver = DriverFactory.createDriver();
+        } catch (RuntimeException first) {
+            Log.info("[Appium] Session did not start, one more attempt: " + firstLine(first));
+            try {
+                driver = DriverFactory.createDriver();
+            } catch (RuntimeException second) {
+                Log.info("[Appium] Session did not start: " + firstLine(second));
+                sessionError = second;
+            }
+        }
+    }
+
+    private static String firstLine(Throwable error) {
+        return error == null || error.getMessage() == null ? String.valueOf(error) : error.getMessage().lines().findFirst().orElse("");
     }
 
     @AfterMethod(alwaysRun = true)
