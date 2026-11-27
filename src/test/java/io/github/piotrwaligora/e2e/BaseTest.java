@@ -11,6 +11,7 @@ import io.qameta.allure.AttachmentOptions;
 import org.openqa.selenium.OutputType;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
+import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
@@ -20,6 +21,7 @@ import org.testng.annotations.Test;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -56,6 +58,7 @@ public abstract class BaseTest {
         Log.info("===== STARTED " + progress + " " + testName(method) + ": " + method.getAnnotation(Test.class).description());
         // Tells Android and iOS results of the same test apart in the combined Allure report
         Allure.parameter("platform", TestConfig.platform());
+        skipOnOtherPlatforms(method);
         driver = DriverFactory.createDriver();
     }
 
@@ -87,6 +90,17 @@ public abstract class BaseTest {
         Allure.attachment("Page source on failure", "text/xml",
                 new ByteArrayInputStream(driver.getPageSource().getBytes(StandardCharsets.UTF_8)),
                 AttachmentOptions.withFileExtension(".xml"));
+    }
+
+    /**
+     * A test without {@link Platforms} runs everywhere; with it, only on the listed platforms.
+     * configfailurepolicy=continue keeps the skip from skipping the next tests of the class.
+     */
+    private static void skipOnOtherPlatforms(Method method) {
+        Platforms platforms = method.getAnnotation(Platforms.class);
+        if (platforms != null && !List.of(platforms.value()).contains(TestConfig.platform())) {
+            throw new SkipException("Not for " + TestConfig.platform() + ": " + platforms.reason());
+        }
     }
 
     private static String testName(Method method) {
