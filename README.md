@@ -1,7 +1,8 @@
 # appium-e2e
 
 [![Tests](https://github.com/piotrwaligora/appium-e2e/actions/workflows/tests.yml/badge.svg)](https://github.com/piotrwaligora/appium-e2e/actions/workflows/tests.yml)
-[![Allure report](https://img.shields.io/badge/Allure-report-orange)](https://piotrwaligora.github.io/appium-e2e/)
+[![Allure Android](https://img.shields.io/badge/Allure-Android-green)](https://piotrwaligora.github.io/appium-e2e/android/)
+[![Allure iOS](https://img.shields.io/badge/Allure-iOS-blue)](https://piotrwaligora.github.io/appium-e2e/ios/)
 
 Java and Appium based test automation framework for mobile apps: one set of tests and page objects
 for Android and iOS. The app under test is the [Sauce Labs My Demo App](docs/app-analysis.md),
@@ -83,7 +84,8 @@ Configuration:
 
 [GitHub Actions](.github/workflows/tests.yml) runs the tests on every push and pull request to `main`, daily and on demand:
 an Android emulator (API 36) on an Ubuntu runner, Appium 4, one retry for failed tests.
-The Allure report of `main` is published to [GitHub Pages](https://piotrwaligora.github.io/appium-e2e/);
+The Allure reports of `main` are published to GitHub Pages, one per platform:
+[Android](https://piotrwaligora.github.io/appium-e2e/android/) and [iOS](https://piotrwaligora.github.io/appium-e2e/ios/);
 every run keeps the report, logs, screenshots and page sources of failures as artifacts.
 
 ## Project structure

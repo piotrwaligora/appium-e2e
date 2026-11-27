@@ -204,9 +204,9 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  # One Allure report with the results of both platforms (each test has a "platform" parameter).
+  # One Allure report per platform: site/android and site/ios, with a start page linking both.
   report:
-    name: Allure report
+    name: Allure reports
     needs: [android, ios]
     if: always() && needs.android.result != 'cancelled' && needs.ios.result != 'cancelled'
     runs-on: ubuntu-latest
@@ -232,31 +232,45 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           pattern: allure-results-*
-          path: target/allure-results
-          merge-multiple: true
+          path: results
 
-      - name: Generate Allure report
-        run: mvn -B allure:report
-
-      - name: Add report link to the run summary
+      # allure:report reads target/allure-results and writes target/site/allure-maven-plugin,
+      # so it runs once per platform; a platform whose job uploaded no results is left out.
+      - name: Generate Allure reports
         run: |
-          echo "### Allure report (Android and iOS)" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Latest report from \`main\`: ${{ env.REPORT_URL }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Report of this run: download the \`allure-report\` artifact below" >> "$GITHUB_STEP_SUMMARY"
+          mkdir -p site
+          for platform in android ios; do
+            if [ ! -d "results/allure-results-$platform" ]; then
+              echo "No results for $platform"
+              continue
+            fi
+            rm -rf target/allure-results target/site/allure-maven-plugin
+            mkdir -p target
+            cp -r "results/allure-results-$platform" target/allure-results
+            mvn -B allure:report
+            cp -r target/site/allure-maven-plugin "site/$platform"
+          done
+          cp .github/pages/index.html site/index.html
 
-      - name: Upload Allure report
+      - name: Add report links to the run summary
+        run: |
+          echo "### Allure reports" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Latest reports from \`main\`: [Android](${{ env.REPORT_URL }}android/), [iOS](${{ env.REPORT_URL }}ios/)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Reports of this run: download the \`allure-report\` artifact below (android/ and ios/ folders)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Allure reports
         uses: actions/upload-artifact@v7
         with:
           name: allure-report
-          path: target/site/allure-maven-plugin
+          path: site
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Upload report for GitHub Pages
+      - name: Upload reports for GitHub Pages
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
         with:
-          path: target/site/allure-maven-plugin
+          path: site
 
   # Publishes the Allure report of main (merge, schedule or manual run) to GitHub Pages, also when tests fail.
   publish-report:
