@@ -2,6 +2,8 @@ package io.github.piotrwaligora.e2e.ui.pages;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
+import io.github.piotrwaligora.e2e.Log;
+import io.github.piotrwaligora.e2e.config.TestConfig;
 import io.github.piotrwaligora.e2e.data.TestData.PaymentCard;
 import io.github.piotrwaligora.e2e.driver.Platform;
 import org.openqa.selenium.By;
@@ -43,8 +45,16 @@ public class PaymentPage extends BasePage {
         return this;
     }
 
-    /** Expiration date as typed on the keypad, e.g. "0330" (the app adds the slash). */
+    /**
+     * Expiration date as typed on the keypad, e.g. "0330" (the app adds the slash).
+     * On iOS the card pre-filled by the app is used, for the same reason as in {@link ShippingAddressPage}.
+     */
     public ReviewOrderPage enterCard(PaymentCard card) {
+        if (TestConfig.platform() == IOS) {
+            Log.step("iOS: using the card pre-filled by the app");
+            actions.clickOn(REVIEW_ORDER_BUTTON);
+            return new ReviewOrderPage(driver).waitUntilLoaded();
+        }
         actions.type(CARD_HOLDER, card.holder());
         actions.type(CARD_NUMBER, card.number());
         actions.type(EXPIRATION_DATE, card.expiration());

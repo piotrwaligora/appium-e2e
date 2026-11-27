@@ -2,6 +2,8 @@ package io.github.piotrwaligora.e2e.ui.pages;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
+import io.github.piotrwaligora.e2e.Log;
+import io.github.piotrwaligora.e2e.config.TestConfig;
 import io.github.piotrwaligora.e2e.data.TestData.Address;
 import io.github.piotrwaligora.e2e.driver.Platform;
 import org.openqa.selenium.By;
@@ -47,7 +49,16 @@ public class ShippingAddressPage extends BasePage {
         return this;
     }
 
+    /**
+     * The iOS app pre-fills the form with a sample address and cannot hide its on-screen keyboard,
+     * which would cover the "To Payment" button; on iOS the pre-filled address is used.
+     */
     public PaymentPage enterAddress(Address address) {
+        if (TestConfig.platform() == IOS) {
+            Log.step("iOS: using the address pre-filled by the app");
+            actions.clickOn(TO_PAYMENT_BUTTON);
+            return new PaymentPage(driver).waitUntilLoaded();
+        }
         actions.type(FULL_NAME, address.fullName());
         actions.type(ADDRESS_LINE, address.addressLine());
         actions.type(CITY, address.city());
