@@ -3,8 +3,6 @@
   "appium:automationName": "XCUITest",
   "appium:app": "apps/SauceLabs-Demo-App.Simulator.zip",
   "appium:deviceName": "iPhone 16",
-  "appium:connectHardwareKeyboard": true,
-  "appium:forceSimulatorSoftwareKeyboardPresence": false,
   "appium:simulatorStartupTimeout": 240000,
   "appium:wdaLaunchTimeout": 240000,
   "appium:wdaStartupRetries": 2,

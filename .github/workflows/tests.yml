@@ -139,11 +139,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/download-apps.ps1 ios
 
-      # Picks an iPhone simulator with the newest iOS installed on the runner; the tests get it with
-      # -Dappium:udid (see DriverFactory). The hardware keyboard is a Simulator.app setting, so the
-      # simulator is booted and opened in Simulator.app with that setting: the on-screen keyboard then
-      # stays hidden and does not cover the buttons (the app cannot dismiss it).
-      - name: Boot an iPhone simulator with a hardware keyboard
+      # Picks an iPhone simulator with the newest iOS installed on the runner and boots it;
+      # the tests get it with -Dappium:udid (see DriverFactory).
+      - name: Boot an iPhone simulator
         run: |
           read -r SIM_UDID SIM_VERSION SIM_NAME < <(xcrun simctl list devices available -j | python3 -c '
           import json, sys
@@ -158,11 +156,7 @@ jobs:
                       best = (key, device["udid"], version, device["name"])
           print(best[1], best[2], best[3])')
           echo "Simulator: $SIM_NAME, iOS $SIM_VERSION, $SIM_UDID"
-          # Hardware keyboard on: the on-screen keyboard stays hidden (the app cannot dismiss it)
-          defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool true
-          defaults write com.apple.iphonesimulator DevicePreferences -dict-add "$SIM_UDID" '{ ConnectHardwareKeyboard = 1; }'
           xcrun simctl boot "$SIM_UDID"
-          open -a Simulator --args -CurrentDeviceUDID "$SIM_UDID"
           xcrun simctl bootstatus "$SIM_UDID" -b
           {
             echo "SIM_UDID=$SIM_UDID"
